@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --bg:#07070a;
+  --card:#0f1115;
+  --muted:#9aa0a6;
+  --accent:#ff2d95;
+  --accent2:#7b2cff;
+}
+
+/* Body background + animated gradient */
+body{
+  background: radial-gradient(1200px at 10% 10%, rgba(123,44,255,0.12), transparent 6%), radial-gradient(800px at 90% 80%, rgba(255,45,149,0.08), transparent 8%), var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Glass card */
+.card-nocturnum{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+}
+
+/* Decorative neon border */
+.neon-border{
+  position:relative;
+}
+.neon-border::after{
+  content:'';
+  position:absolute;inset:0;border-radius:12px;
+  padding:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity:0.9;
+  filter: blur(10px) saturate(120%);
+  pointer-events:none;
+}
+
+/* Buttons */
+.btn-neon{
+  background: linear-gradient(90deg,var(--accent),var(--accent2));
+  color:white;padding:0.5rem 1rem;border-radius:10px;font-weight:600;
+  box-shadow:0 6px 20px rgba(123,44,255,0.12);
+}
+.btn-ghost{
+  background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:.5rem .8rem;border-radius:10px
+}
+
+/* small utility */
+.fade-in{animation:fadeIn .6s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.header-deco{
+  height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;opacity:.9;filter:blur(8px);
+}
