@@ -29,6 +29,7 @@ export default {
       animation: {
         neon: 'neon 2.2s ease-in-out infinite',
         floaty: 'floaty 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 3.5s ease-in-out infinite',
         sweep: 'sweep 2.8s linear infinite'
       }
     }

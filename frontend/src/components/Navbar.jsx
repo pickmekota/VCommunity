@@ -1,30 +1,87 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Navbar({user, logout}){
-  const nav = useNavigate();
+function Navbar({ user, logout }) {
+  const navigate = useNavigate();
+
+  const handleLogoClick = () => {
+    if (user) navigate("/feed");
+    else navigate("/");
+  };
+
   return (
-    <header className="bg-gradient-to-r from-black/60 via-transparent to-black/60 border-b border-white/5">
-      <div className="container mx-auto flex items-center justify-between p-4">
-        <div className="flex items-center space-x-3">
-          <div className="text-2xl font-extrabold tracking-wider" style={{color:'white'}}>VCommunity</div>
-          <div className="hidden md:block text-sm text-white/60">Nocturnum • Social for agents</div>
-        </div>
+    <nav className="backdrop-blur-md bg-black/30 border-b border-purple-800/40 shadow-lg shadow-purple-900/30">
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        
+        {/* ЛОГО БЛОК — СЛЕВА */}
+        <button
+          onClick={handleLogoClick}
+          className="text-3xl font-extrabold tracking-wider text-purple-400 
+                     drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]
+                     transition duration-300 hover:text-purple-300 
+                     hover:drop-shadow-[0_0_15px_rgba(236,72,255,1)]
+                     animate-pulse-slow"
+        >
+          VCommunity
+        </button>
 
-        <nav className="flex items-center gap-3">
-          <Link to="/" className="text-sm text-white/70 hover:text-white">Home</Link>
-          <Link to="/feed" className="text-sm text-white/70 hover:text-white">Feed</Link>
-          <Link to="/lfg" className="text-sm text-white/70 hover:text-white">LFG</Link>
-          <Link to="/training" className="text-sm text-white/70 hover:text-white">Training</Link>
-          {user ? (
+        {/* ПРАВАЯ ЧАСТЬ */}
+        <div className="flex items-center gap-6 text-lg">
+
+          {/* Если НЕ залогинен */}
+          {!user && (
             <>
-              <button onClick={()=>{logout();nav('/')}} className="btn-ghost">Sign out</button>
+              <button
+                onClick={() => navigate("/login")}
+                className="hover:text-purple-300 transition duration-200"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="hover:text-purple-300 transition duration-200"
+              >
+                Register
+              </button>
             </>
-          ) : (
-            <Link to="/login" className="btn-neon">Sign in</Link>
           )}
-        </nav>
+
+          {/* Если залогинен */}
+          {user && (
+            <>
+              <button
+                onClick={() => navigate("/lfg")}
+                className="hover:text-purple-300 transition duration-200"
+              >
+                LFG
+              </button>
+
+              <button
+                onClick={() => navigate("/training")}
+                className="hover:text-purple-300 transition duration-200"
+              >
+                Training
+              </button>
+
+              <button
+                onClick={() => navigate(`/profile/${user.id}`)}
+                className="hover:text-purple-300 transition duration-200"
+              >
+                Profile
+              </button>
+
+              <button
+                onClick={logout}
+                className="text-red-400 hover:text-red-300 transition duration-200"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
       </div>
-    </header>
-  )
+    </nav>
+  );
 }
+
+export default Navbar;

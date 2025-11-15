@@ -59,3 +59,266 @@ body{
 .header-deco{
   height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;opacity:.9;filter:blur(8px);
 }
+
+/* -----------------------------
+   Nocturnum Home — epic effects
+   ----------------------------- */
+
+/* Background layers */
+.nocturnum-bg {
+  background:
+    radial-gradient(800px at 10% 20%, rgba(123,44,255,0.12), transparent 8%),
+    radial-gradient(900px at 90% 80%, rgba(255,45,149,0.06), transparent 5%),
+    linear-gradient(180deg, rgba(5,5,8,1) 0%, rgba(10,8,15,1) 45%, rgba(4,3,7,1) 100%);
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: saturate(120%);
+}
+
+/* floor grid */
+.floor-grid {
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px;
+  background-position: 50% 70%;
+  transform: perspective(900px) translateZ(0);
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  animation: gridSweep 6s linear infinite;
+  will-change: background-position;
+}
+
+/* particles */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,45,149,0.95), rgba(123,44,255,0.85));
+  opacity: 0.85;
+  transform: translate3d(0,0,0);
+  animation: particleFloat 8s ease-in-out infinite;
+}
+
+/* scanline */
+.scanline {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 100%);
+  opacity: 0.02;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: scanMove 5s linear infinite;
+}
+.scanline-exit {
+  animation: scanExit 0.9s ease forwards;
+}
+
+/* neon title & letters */
+.neon-title {
+  text-shadow:
+    0 0 14px rgba(123,44,255,0.08),
+    0 0 32px rgba(255,45,149,0.06);
+  color: white;
+}
+
+.neon-letter {
+  display: inline-block;
+  transform-origin: 50% 50%;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px rgba(255,45,149,0.18));
+  animation: letterPop 0.7s cubic-bezier(.15,.9,.1,1) forwards;
+}
+
+/* hero sub text */
+.hero-sub {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: fadeInUp 700ms ease forwards;
+  animation-delay: 1.2s;
+}
+
+/* enter button */
+.enter-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 28px;
+  background: linear-gradient(90deg, rgba(255,45,149,0.14), rgba(123,44,255,0.12));
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 2px;
+  box-shadow: 0 8px 30px rgba(123,44,255,0.06), inset 0 -2px 12px rgba(0,0,0,0.25);
+  transition: transform .22s ease, box-shadow .22s ease, opacity .25s;
+  cursor: pointer;
+  overflow: visible;
+}
+.enter-btn:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 18px 40px rgba(123,44,255,0.18), 0 0 30px rgba(255,45,149,0.06);
+}
+.enter-btn::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,45,149,0.08), rgba(123,44,255,0.08));
+  filter: blur(10px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.enter-inner {
+  position: relative;
+  z-index: 2;
+}
+
+/* exit flash overlay */
+.enter-flash {
+  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.85), rgba(255,45,149,0.12) 20%, rgba(123,44,255,0.06) 45%, transparent 60%);
+  opacity: 1;
+}
+
+/* animations */
+@keyframes letterPop {
+  0% { transform: translateY(18px) rotateX(18deg) scale(0.96); opacity: 0; filter: blur(4px) }
+  60% { transform: translateY(-4px) rotateX(0deg) scale(1.02); opacity: 1; filter: blur(0) }
+  100% { transform: translateY(0) rotateX(0) scale(1); opacity: 1 }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px) }
+  to { opacity: 1; transform: translateY(0) }
+}
+@keyframes particleFloat {
+  0% { transform: translateY(0) translateX(0) }
+  50% { transform: translateY(-18px) translateX(6px) }
+  100% { transform: translateY(0) translateX(0) }
+}
+@keyframes scanMove {
+  0% { background-position: -200% 0%; opacity: 0.03 }
+  50% { background-position: 50% 0%; opacity: 0.06 }
+  100% { background-position: 200% 0%; opacity: 0.03 }
+}
+@keyframes gridSweep {
+  0% { background-position: 0% 70% }
+  50% { background-position: 50% 69% }
+  100% { background-position: 100% 70% }
+}
+@keyframes scanExit {
+  0% { transform: translateY(0); opacity: 0.03 }
+  50% { transform: translateY(-6px); opacity: 0.12 }
+  100% { transform: translateY(-20px); opacity: 0 }
+}
+
+/* responsive tweaks */
+@media (max-width: 640px) {
+  .neon-title { font-size: 2.2rem !important }
+  .enter-btn { padding: 10px 18px }
+}
+/* Floating wave animation */
+.neon-title {
+  display: inline-block;
+  animation: titleFloat 6s ease-in-out infinite;
+  animation-delay: 1.3s;
+}
+
+/* Each letter gets a soft breathing glow */
+.neon-letter {
+  animation:
+    letterPop 0.7s cubic-bezier(.15,.9,.1,1) forwards,
+    neonGlow 4s ease-in-out infinite alternate,
+    letterWave 5s ease-in-out infinite;
+}
+
+@keyframes titleFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes neonGlow {
+  0% {
+    filter: drop-shadow(0 0 8px rgba(255,45,149,0.2))
+            drop-shadow(0 0 16px rgba(123,44,255,0.15));
+  }
+  100% {
+    filter: drop-shadow(0 0 14px rgba(255,45,149,0.35))
+            drop-shadow(0 0 28px rgba(123,44,255,0.25));
+  }
+}
+
+/* Soft wave shift on letters */
+@keyframes letterWave {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+.enter-btn {
+  transition: transform 0.35s ease, box-shadow 0.4s ease, opacity .3s ease;
+}
+
+.enter-btn:hover {
+  transform: translateY(-4px) scale(1.025);
+}
+.nocturnum-bg {
+  animation: bgPulse 14s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+  0% { filter: saturate(110%) brightness(0.8); }
+  100% { filter: saturate(150%) brightness(1); }
+}
+.particle {
+  animation: particleFloat 10s ease-in-out infinite;
+}
+/* --- Nocturnum Home styles --- */
+
+/* Neon logo / floating */
+@keyframes neonFloat {
+  0% { transform: translateY(0); filter: drop-shadow(0 0 16px rgba(160,90,255,0.08)); }
+  50% { transform: translateY(-8px); filter: drop-shadow(0 0 30px rgba(200,120,255,0.18)); }
+  100% { transform: translateY(0); filter: drop-shadow(0 0 16px rgba(160,90,255,0.08)); }
+}
+.neon-logo {
+  background: linear-gradient(90deg, #b084ff, #ff6fb5 40%, #6ad0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 6px 24px rgba(120,40,200,0.18);
+  animation: neonFloat 6s ease-in-out infinite;
+  letter-spacing: 0.06em;
+}
+
+/* Enter button neon */
+.enter-neon {
+  background: linear-gradient(90deg, rgba(148,80,255,0.18), rgba(255,90,160,0.12));
+  border: 1px solid rgba(160,90,255,0.26);
+  box-shadow:
+    0 6px 40px rgba(120,40,200,0.12),
+    0 0 18px rgba(200,90,255,0.06) inset;
+  padding-left: 28px;
+  padding-right: 28px;
+  position: relative;
+}
+.enter-neon:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 18px 80px rgba(150,60,255,0.18),
+    0 0 36px rgba(255,80,150,0.12) inset;
+}
+
+/* small glowing circle left of button text */
+.enter-neon .enter-glow {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle, #ff88c8 0%, #a860ff 40%, transparent 70%);
+  border-radius: 999px;
+  display: inline-block;
+  box-shadow: 0 0 12px #ff88c8, 0 0 26px #a860ff;
+  transform: translateY(0);
+  transition: transform .4s ease;
+}
+.enter-neon:hover .enter-glow {
+  transform: translateY(-2px) scale(1.06);
+}
+
+/* subtle responsive adjustments */
+@media (max-width: 640px) {
+  .neon-logo { font-size: 2.2rem !important; }
+  .enter-neon { padding-left: 18px; padding-right: 18px; padding-top: 10px; padding-bottom: 10px; font-size: 0.95rem; }
+  .mx-auto { padding-left: 16px; padding-right: 16px; }
+}

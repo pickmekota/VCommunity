@@ -1,22 +1,18 @@
-import React from 'react'
+import React from "react";
+import { motion } from "framer-motion";
 
-export default function PostCard({post}){
+export default function PostCard({ post }) {
+  if (!post) return null;
+
   return (
-    <article className="card-nocturnum p-4 rounded-xl border border-white/6 mb-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="font-semibold">{post.author || 'Anonymous'}</div>
-          <div className="text-xs text-white/60">{post.time || 'just now'}</div>
-        </div>
-        <div className="text-sm text-white/60">Likes: {post.likes || 0}</div>
-      </div>
-
-      <p className="mt-3 text-white/90">{post.content}</p>
-
-      <div className="mt-3 flex gap-2">
-        <button className="btn-ghost">Reply</button>
-        <button className="btn-neon">Like</button>
-      </div>
-    </article>
-  )
+    <motion.div
+      className="bg-[rgba(10,5,25,0.6)] border border-[rgba(130,50,250,0.3)] rounded-2xl p-4 shadow-md backdrop-blur-md cursor-pointer"
+      whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(130,50,250,0.7)" }}
+      transition={{ type: "spring", stiffness: 200, damping: 18 }}
+    >
+      <h3 className="text-lg font-bold text-purple-300">{post.author}</h3>
+      <p className="text-gray-200 mt-1">{post.content}</p>
+      <div className="mt-2 text-xs text-gray-400">#VCommunity</div>
+    </motion.div>
+  );
 }
