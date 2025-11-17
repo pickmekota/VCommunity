@@ -1,170 +1,224 @@
-import React, { useEffect, useRef, useState } from "react";
-import Navbar from "../components/Navbar";
-import LFGCard from "../components/LFGCard";
-import PostCard from "../components/PostCard";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 
-/**
- * Feed.jsx — Nocturnum style feed page
- */
-
-export default function Feed() {
-  const canvasRef = useRef(null);
-  const particlesRef = useRef([]);
-  const animRef = useRef(null);
-  const navigate = useNavigate();
-
+function Feed({ currentUser }) {
   const [posts, setPosts] = useState([]);
-  const [onlinePlayers, setOnlinePlayers] = useState([]);
+  const [content, setContent] = useState("");
 
-  // Redirect if not logged in
+  const API = import.meta.env.VITE_API_URL || "http://localhost:4000"; // по умолчанию порт 4000
+
+  // === Загрузка постов с backend ===
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) navigate("/login", { replace: true });
-  }, [navigate]);
+    fetch(`${API}/api/posts`)
+      .then((res) => res.json())
+      .then((data) => setPosts(data))
+      .catch((err) => console.error("Fetch posts error:", err));
+  }, [API]);
 
-  // Example fetch posts (replace with real API)
-  useEffect(() => {
-    setPosts([
-      { id: 1, author: "AgentX", content: "Собираю команду на матч!", likes: 12 },
-      { id: 2, author: "Viper", content: "Тренировка реакций сегодня в 20:00", likes: 8 },
-    ]);
+  // === Создать новый пост ===
+  const createPost = async () => {
+    if (!content.trim()) return;
 
-    setOnlinePlayers(["AgentX", "Viper", "Phoenix", "Jett"]);
-  }, []);
-
-  // Particles background
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let dpr = window.devicePixelRatio || 1;
-
-    function resize() {
-      dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(canvas.clientWidth * dpr);
-      canvas.height = Math.floor(canvas.clientHeight * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function createParticles() {
-      const area = canvas.clientWidth * canvas.clientHeight;
-      const baseCount = Math.round((area / 80000) * 60);
-      const count = Math.max(25, Math.min(baseCount, 120));
-      particlesRef.current = Array.from({ length: count }).map(() => {
-        const size = Math.random() * 2.4 + 0.6;
-        return {
-          x: Math.random() * canvas.clientWidth,
-          y: Math.random() * canvas.clientHeight,
-          vx: (Math.random() - 0.5) * 0.26,
-          vy: (Math.random() - 0.5) * 0.26,
-          size,
-          hue: 270 + Math.random() * 60,
-          alpha: 0.08 + Math.random() * 0.45,
-          phase: Math.random() * Math.PI * 2,
-          sway: 0.2 + Math.random() * 0.6,
-        };
+    try {
+      const res = await fetch(`${API}/api/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: currentUser?.id,
+          content,
+        }),
       });
+      const newPost = await res.json();
+      setPosts([newPost, ...posts]);
+      setContent("");
+    } catch (err) {
+      console.error("Create post error:", err);
     }
+  };
 
-    function draw(now) {
-      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-
-      // subtle background gradient
-      const g = ctx.createLinearGradient(0, 0, canvas.clientWidth, canvas.clientHeight);
-      g.addColorStop(0, "rgba(8,6,20,0.6)");
-      g.addColorStop(0.5, "rgba(10,8,18,0.6)");
-      g.addColorStop(1, "rgba(6,4,10,0.6)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-
-      const particles = particlesRef.current;
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.x += p.vx + Math.cos((now / 1000) * p.sway + p.phase) * 0.02;
-        p.y += p.vy + Math.sin((now / 1200) * p.sway + p.phase) * 0.02;
-
-        if (p.x < -10) p.x = canvas.clientWidth + 10;
-        if (p.x > canvas.clientWidth + 10) p.x = -10;
-        if (p.y < -10) p.y = canvas.clientHeight + 10;
-        if (p.y > canvas.clientHeight + 10) p.y = -10;
-
-        ctx.beginPath();
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 8);
-        grad.addColorStop(0, `hsla(${p.hue}, 80%, 65%, ${p.alpha})`);
-        grad.addColorStop(0.4, `hsla(${p.hue}, 80%, 45%, ${p.alpha * 0.65})`);
-        grad.addColorStop(1, `hsla(${p.hue}, 70%, 20%, 0)`);
-        ctx.fillStyle = grad;
-        ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${Math.min(1, p.alpha * 2)})`;
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      animRef.current = requestAnimationFrame(draw);
+  // === Лайк поста ===
+  const likePost = async (postId) => {
+    try {
+      const res = await fetch(`${API}/api/posts/like/${postId}`, { method: "POST" });
+      const updated = await res.json();
+      setPosts(posts.map((p) => (p.id === postId ? updated : p)));
+    } catch (err) {
+      console.error("Like post error:", err);
     }
+  };
 
-    resize();
-    createParticles();
-    animRef.current = requestAnimationFrame(draw);
-    const onResize = () => {
-      resize();
-      createParticles();
-    };
-    window.addEventListener("resize", onResize);
+  // === Репост ===
+  const repostPost = async (postId) => {
+    try {
+      const res = await fetch(`${API}/api/posts/repost/${postId}`, { method: "POST" });
+      const updated = await res.json();
+      setPosts(posts.map((p) => (p.id === postId ? updated : p)));
+    } catch (err) {
+      console.error("Repost error:", err);
+    }
+  };
 
-    return () => {
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(animRef.current);
-    };
-  }, []);
+  // === Добавление комментария ===
+  const addComment = async (postId, text) => {
+    if (!text.trim()) return;
+
+    try {
+      const res = await fetch(`${API}/api/posts/comment/${postId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: currentUser?.id,
+          text,
+        }),
+      });
+      const updated = await res.json();
+      setPosts(posts.map((p) => (p.id === postId ? updated : p)));
+    } catch (err) {
+      console.error("Add comment error:", err);
+    }
+  };
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden ">
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full -z-10" />
+    <div className="min-h-screen bg-black text-white flex justify-center pt-6 px-4">
 
-      
-
-      <div className="flex gap-4 px-4 pt-4">
-        {/* Sidebar */}
-        <aside className="w-64 hidden md:block text-gray-300 space-y-4">
-          <div className="p-3 hover:text-purple-400 cursor-pointer rounded-lg transition-colors">Feed</div>
-          <div className="p-3 hover:text-purple-400 cursor-pointer rounded-lg transition-colors">LFG</div>
-          <div className="p-3 hover:text-purple-400 cursor-pointer rounded-lg transition-colors">Training</div>
-          <div className="p-3 hover:text-purple-400 cursor-pointer rounded-lg transition-colors">Players</div>
-          <div className="p-3 hover:text-purple-400 cursor-pointer rounded-lg transition-colors">Profile</div>
-        </aside>
-
-        {/* Main Feed */}
-        <main className="flex-1 space-y-4">
-          {posts.map((post) => (
-            <motion.div
-              key={post.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <PostCard post={post} />
-            </motion.div>
-          ))}
-        </main>
-
-        {/* Right Panel */}
-        <aside className="w-64 hidden lg:block text-gray-300 space-y-4">
-          <div className="p-3 text-lg font-semibold">Online Players</div>
-          {onlinePlayers.map((p, i) => (
-            <div key={i} className="p-2 hover:text-purple-400 transition-colors cursor-pointer rounded">
-              {p}
+      {/* === ЛЕВАЯ КОЛОНКА === */}
+      <aside className="hidden lg:flex flex-col w-64 mr-6 gap-4">
+        <div className="p-4 rounded-2xl bg-black/30 border border-purple-700/40 shadow-lg backdrop-blur-lg">
+          <div className="flex items-center gap-3">
+            <img
+              src={currentUser?.avatar || "/avatar.jpg"}
+              alt="avatar"
+              className="w-12 h-12 rounded-full border border-purple-500"
+            />
+            <div>
+              <h3 className="font-bold text-purple-300">{currentUser?.username}</h3>
+              <p className="text-sm text-gray-400">Level {currentUser?.level}</p>
             </div>
-          ))}
-          <div className="p-3 text-lg font-semibold mt-6">Events</div>
-          <div className="p-2 text-gray-400">No upcoming events</div>
-        </aside>
-      </div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-black/30 border border-purple-700/40 shadow-lg backdrop-blur-lg">
+          <nav className="flex flex-col gap-3">
+            <Link className="hover:text-purple-300 transition">Feed</Link>
+            <Link to="/lfg" className="hover:text-purple-300 transition">LFG</Link>
+            <Link to="/training" className="hover:text-purple-300 transition">Training</Link>
+            <Link to={`/profile/${currentUser?.id}`} className="hover:text-purple-300 transition">Profile</Link>
+          </nav>
+        </div>
+      </aside>
+
+      {/* === СЕРЕДИНА: ЛЕНТА === */}
+      <main className="w-full max-w-2xl flex flex-col gap-6">
+
+        {/* Создание поста */}
+        <div className="p-4 rounded-2xl bg-black/40 border border-purple-700/40 shadow-lg backdrop-blur-lg">
+          <textarea
+            className="w-full bg-black/20 p-3 rounded-xl border border-purple-600/30 focus:border-purple-400 outline-none"
+            placeholder="Share your thoughts…"
+            rows="3"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+          <button
+            className="mt-3 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-xl transition"
+            onClick={createPost}
+          >
+            Post
+          </button>
+        </div>
+
+        {/* Посты */}
+        {posts.map((post) => (
+          <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-4 rounded-2xl bg-black/40 border border-purple-700/40 shadow-lg backdrop-blur-lg"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src={post.user?.avatar || "/avatar.jpg"}
+                className="w-10 h-10 rounded-full border border-purple-500"
+              />
+              <div>
+                <h4 className="font-bold text-purple-300">{post.user?.username}</h4>
+                <p className="text-xs text-gray-400">{new Date(post.created_at).toLocaleString()}</p>
+              </div>
+            </div>
+
+            <p className="text-gray-200 mb-4">{post.content}</p>
+
+            {/* Лайки / Комментарии / Репосты */}
+            <div className="flex gap-6 text-gray-400 mb-2">
+              <button className="hover:text-purple-300 transition" onClick={() => likePost(post.id)}>
+                ❤️ {post.likes}
+              </button>
+
+              <span className="hover:text-purple-300 transition">💬 {post.comments?.length || 0}</span>
+
+              <button className="hover:text-purple-300 transition" onClick={() => repostPost(post.id)}>
+                🔁 {post.reposts || 0}
+              </button>
+            </div>
+
+            {/* Комментарии */}
+            <div className="flex flex-col gap-2">
+              {post.comments?.map((c) => (
+                <div key={c.id} className="flex items-start gap-2 text-gray-300 text-sm">
+                  <img src={c.user?.avatar || "/avatar.jpg"} className="w-6 h-6 rounded-full border border-purple-500" />
+                  <div>
+                    <span className="font-bold text-purple-300">{c.user?.username}:</span> {c.text}
+                  </div>
+                </div>
+              ))}
+              {/* Добавление комментария */}
+              <CommentInput postId={post.id} addComment={addComment} />
+            </div>
+          </motion.div>
+        ))}
+      </main>
+
+      {/* === ПРАВАЯ КОЛОНКА === */}
+      <aside className="hidden xl:flex flex-col w-72 ml-6 gap-4">
+        <div className="p-4 rounded-2xl bg-black/30 border border-purple-700/40 shadow-lg backdrop-blur-lg">
+          <h3 className="text-purple-300 font-bold mb-3">Trending</h3>
+          <ul className="space-y-2 text-gray-300 text-sm">
+            <li className="hover:text-purple-300 cursor-pointer">• Best Agents This Week</li>
+            <li className="hover:text-purple-300 cursor-pointer">• Last Night Highlights</li>
+            <li className="hover:text-purple-300 cursor-pointer">• Valorant 9.05 Patch</li>
+            <li className="hover:text-purple-300 cursor-pointer">• Top Ranked Players</li>
+          </ul>
+        </div>
+      </aside>
     </div>
   );
 }
+
+// Компонент для ввода комментария
+function CommentInput({ postId, addComment }) {
+  const [text, setText] = useState("");
+
+  const submit = () => {
+    addComment(postId, text);
+    setText("");
+  };
+
+  return (
+    <div className="flex gap-2 mt-2">
+      <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Add a comment..."
+        className="flex-1 bg-black/20 p-2 rounded-xl border border-purple-600/30 outline-none text-sm"
+      />
+      <button onClick={submit} className="px-2 py-1 bg-purple-600 rounded-xl hover:bg-purple-500 text-sm">
+        Post
+      </button>
+    </div>
+  );
+}
+
+export default Feed;
