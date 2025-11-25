@@ -1,22 +1,32 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const app = express();
-const PORT = process.env.PORT || 5000;
+// backend/index.js
+import dotenv from "dotenv";
+dotenv.config();
 
-// Middleware
-app.use(cors());
+import express from "express";
+import cors from "cors";
+
+// Routes
+import authRoutes from "./routes/auth.js";
+import usersRoutes from "./routes/users.js";
+import postsRoutes from "./routes/posts.js";
+
+const app = express();
+
+// CORS
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// JSON Middleware
 app.use(express.json());
 
 // Routes
-const usersRouter = require('./routes/users');
-const postsRouter = require('./routes/posts');
-const lfgRouter = require('./routes/lfg');
-const trainingRouter = require('./routes/training');
+app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
+app.use("/api/posts", postsRoutes);
 
-app.use('/api/users', usersRouter);
-app.use('/api/posts', postsRouter);
-app.use('/api/lfg', lfgRouter);
-app.use('/api/training', trainingRouter);
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

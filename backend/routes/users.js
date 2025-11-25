@@ -1,24 +1,36 @@
-const express = require('express');
+import express from "express";
+import auth from "../middleware/auth.js";
+import { updateUser } from "../models/userModel.js";
+import { getUserByIdController } from "../controllers/usersController.js";
+
 const router = express.Router();
-const auth = require('../middleware/auth');
 
-let users = [{ id: 1, name: 'Viktoria', email: 'viktoria@example.com' }];
-
-router.get('/:id', (req, res) => {
-  const user = users.find(u => u.id == req.params.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  res.json(user);
+// GET /users/me — текущий пользователь
+router.get("/me", auth, (req, res) => {
+  res.json(req.user);
 });
 
-router.put('/:id', auth, (req, res) => {
-  const user = users.find(u => u.id == req.params.id);
-  if (!user) return res.status(404).json({ message: 'User not found' });
+router.get("/:id", getUserByIdController);
 
-  const { name, email } = req.body;
-  if (name) user.name = name;
-  if (email) user.email = email;
 
-  res.json({ message: 'Profile updated', user });
+// PUT /users/me — обновить профиль
+router.put("/me", auth, async (req, res) => {
+  try {
+    const allowed = ["username", "avatar_url", "rank", "role", "xp", "riot_id"];
+    const updates = {};
+
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+
+    const updated = await updateUser(req.user.id, updates);
+
+    res.json({ message: "Updated", user: updated });
+  } catch (e) {
+    console.error("Update error:", e.message);
+    console.error(e.stack);
+    res.status(500).json({ message: "Server error", detail: e.message });
+  }
 });
 
-module.exports = router;
+export default router;

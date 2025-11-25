@@ -8,6 +8,8 @@ import Profile from './pages/Profile';
 import LFG from './pages/LFG';
 import Training from './pages/Training';
 import Home from './pages/Home';
+import EditProfile from "./pages/EditProfile";
+
 
 export default function App(){
   const [user, setUser] = useState(null);
@@ -25,6 +27,7 @@ export default function App(){
         <Navbar user={user} logout={logout} />
         <main className="container mx-auto p-6">
           <Routes>
+            <Route path="*" element={<p className="text-white">Page not found</p>} />
             <Route path="/" element={<Home/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="/register" element={<Register/>} />
@@ -32,6 +35,7 @@ export default function App(){
             <Route path="/profile/:id" element={<Profile/>} />
             <Route path="/lfg" element={<LFG/>} />
             <Route path="/training" element={<Training/>} />
+          <Route path="/edit-profile" element={<EditProfile />} />
           </Routes>
         </main>
       </div>

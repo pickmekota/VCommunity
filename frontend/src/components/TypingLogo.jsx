@@ -17,7 +17,7 @@ export default function TypingLogo() {
   }, []);
 
   return (
-    <motion.h1
+    <motion.h2
       className="text-6xl font-bold text-violet-300 drop-shadow-[0_0_20px_rgba(150,80,255,0.8)] tracking-wide"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -29,6 +29,6 @@ export default function TypingLogo() {
         animate={{ opacity: [0, 1, 0] }}
         transition={{ repeat: Infinity, duration: 0.8 }}
       ></motion.span>
-    </motion.h1>
+    </motion.h2>
   );
 }
